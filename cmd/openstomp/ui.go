@@ -5,13 +5,6 @@ import (
 	"image/color"
 	"time"
 
-	"os"
-	"os/exec"
-	"path/filepath"
-	"runtime"
-	"strings"
-	"syscall"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/canvas"
@@ -167,7 +160,7 @@ func InitUI() {
 
 	controlSection := container.New(layout.NewGridLayout(4), PC1, PC2, PC3, PC4, CC1, CC2, CC3, CC4)
 
-	ports,_ := listSerialPorts()
+	ports,_ := ListSerialPorts()
 	serial := widget.NewLabel("Select a Serial Port:")
 	serialSelect = widget.NewSelect(ports, func(s string) {})
 	serialConfirm = widget.NewButton("Connect", func () {
@@ -192,7 +185,7 @@ func InitUI() {
 
 	refreshPorts := func ()  {
 		for {
-			ports,_ = listSerialPorts()
+			ports,_ = ListSerialPorts()
 			foundPort := false
 
 			for _,v := range ports {
@@ -217,78 +210,3 @@ func InitUI() {
 	w.ShowAndRun()
 	
 }
-
-
-// List serial ports by scanning /dev/serial/by-id (Linux), /dev/tty.* (macOS), and COM ports (Windows)
-func listSerialPorts() ([]string, error) {
-	var ports []string
-
-	switch runtime.GOOS {
-	case "linux":
-		// On Linux, use /dev/serial/by-id/
-		serialByIDPath := "/dev/serial/by-id"
-		if _, err := os.Stat(serialByIDPath); os.IsNotExist(err) {
-			return nil, fmt.Errorf("directory %s does not exist", serialByIDPath)
-		}
-		// Walk through the /dev/serial/by-id directory
-		err := filepath.Walk(serialByIDPath, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-
-			// Only process the symbolic links (files)
-			if !info.IsDir() {
-				// Resolve the symlink to get the actual device file (e.g., /dev/ttyUSB0)
-				//devicePath, err := os.Readlink(path)
-				//if err != nil {
-				//	return err
-				//}
-
-				// Add the full path of the device to the list
-				ports = append(ports, path)
-			}
-			return nil
-		})
-		if err != nil {
-			return nil, err
-		}
-
-	case "darwin":
-		// On macOS, serial ports are usually named /dev/tty.*
-		// Look for serial ports in /dev/ directory matching tty.*
-		err := filepath.Walk("/dev", func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-
-			// Match serial devices like /dev/tty.usbserial* or /dev/tty.usbmodem*
-			if strings.HasPrefix(info.Name(), "tty.") && (strings.Contains(info.Name(), "usbserial") || strings.Contains(info.Name(), "usbmodem")) {
-				ports = append(ports, path)
-			}
-			return nil
-		})
-		if err != nil {
-			return nil, err
-		}
-
-	case "windows":
-		// On Windows, serial ports are named COM1, COM2, etc.
-		// Use mode or query the registry for serial ports
-		cmd := exec.Command("powershell", "-WindowStyle", "Hidden", "-Command", "Get-WmiObject Win32_SerialPort | Select-Object -ExpandProperty DeviceID")
-		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true} // Suppress window
-
-		output, err := cmd.Output()
-		if err != nil {
-			return nil, err
-		}	
-
-		// Parse and print the output
-		devices := strings.Split(strings.TrimSpace(string(output)), "\n")
-		for _, device := range devices {
-			ports = append(ports, device)
-		}
-	}
-
-	return ports, nil
-}
-
