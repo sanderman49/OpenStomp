@@ -1,0 +1,42 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install x11 dependencies
+      run: sudo apt install -y libx11-dev xserver-xorg-dev xorg-dev
+      
+    - name: Install mingw-w64 for Windows build
+      run: sudo apt install -y mingw-w64
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.23'
+
+    - name: Build for Windows
+      run: env GOOS=windows GOARCH=386 CGO_ENABLED=1 CC=i686-w64-mingw32-gcc CXX=i686-w64-mingw32-g++ go build -ldflags -H=windowsgui -v ./...
+      
+    - name: Build for Linux
+      run: go build -v ./...
+      
+    - name: Test
+      run: go test -v ./...
+  
+    - name: Upload build as artifact.
+      uses: actions/upload-artifact@v4.6.2
+      with:
+        name: openstomp-builds 
+        path: ./openstomp*
+        retention-days: 90
