@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"syscall"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -273,17 +274,18 @@ func listSerialPorts() ([]string, error) {
 	case "windows":
 		// On Windows, serial ports are named COM1, COM2, etc.
 		// Use mode or query the registry for serial ports
-		cmd := exec.Command("mode")
+		cmd := exec.Command("powershell", "-WindowStyle", "Hidden", "-Command", "Get-WmiObject Win32_SerialPort | Select-Object -ExpandProperty DeviceID")
+		cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true} // Suppress window
+
 		output, err := cmd.Output()
 		if err != nil {
 			return nil, err
-		}
-		// Parse the output to find COM ports
-		// Look for lines starting with COM1, COM2, etc.
-		for _, line := range strings.Split(string(output), "\n") {
-			if strings.HasPrefix(line, "COM") {
-				ports = append(ports, line)
-			}
+		}	
+
+		// Parse and print the output
+		devices := strings.Split(strings.TrimSpace(string(output)), "\n")
+		for _, device := range devices {
+			ports = append(ports, device)
 		}
 	}
 
