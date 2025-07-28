@@ -2,6 +2,7 @@ using System.Reflection;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using OpenStomp.Models.Directory;
 using OpenStomp.ViewModels;
 using OpenStomp.Views;
 using ReactiveUI;
@@ -26,6 +27,8 @@ public partial class App : Application
             {
                 DataContext = new ShellViewModel(),
             };
+            
+            Config.GenerateConfigPath();
         }
 
         base.OnFrameworkInitializationCompleted();
