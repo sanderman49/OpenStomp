@@ -13,7 +13,7 @@ public class Button
     public enum ButtonMode
     {
         Navigation = 0,
-        Program = 1,
+        Scene = 1,
         Control = 2,
     }
     

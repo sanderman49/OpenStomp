@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -9,8 +10,15 @@ namespace OpenStomp.Views;
 public partial class MainView : ReactiveUserControl<MainViewModel>
 {
 
+    private MainViewModel _viewModel;
+    
     public MainView()
     {
         InitializeComponent();
+    }
+    
+    private void OnDataContextChanged(object sender, EventArgs e)
+    {
+        _viewModel = (MainViewModel)DataContext;
     }
 }

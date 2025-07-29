@@ -5,7 +5,59 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="OpenStomp.Views.MainView"
-             x:DataType="vm:MainViewModel">
+             x:DataType="vm:MainViewModel"
+             DataContextChanged="OnDataContextChanged">
     
-    <TextBlock Text="test"></TextBlock>
+    <StackPanel HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+        <StackPanel.Styles>
+            <Style Selector="StackPanel, Button, TextBlock">
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="Margin" Value="3"/>
+            </Style>
+        </StackPanel.Styles>
+        
+        <StackPanel Orientation="Horizontal">
+            <Button Command="{Binding DecrementPageNumber}">-</Button>
+            <TextBlock Text="{Binding FormattedPage}"/>
+            <Button Command="{Binding IncrementPageNumber}">+</Button>
+        </StackPanel>
+        
+        <ItemsControl x:Name="SceneItemsControl"
+                      ItemsSource="{Binding VisibleScenes}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Command="{Binding #SceneItemsControl.((vm:MainViewModel)DataContext).SelectScene}" CommandParameter="{Binding}">
+                            <TextBlock Text="{Binding Name}"></TextBlock>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+
+        <StackPanel Orientation="Horizontal">
+            <ItemsControl x:Name="ControlItemsControl"
+                          ItemsSource="{Binding VisibleControls}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Button Command="{Binding #ControlItemsControl.((vm:MainViewModel)DataContext).EditControl}" CommandParameter="{Binding}">
+                            <TextBlock Text="{Binding Name}"></TextBlock>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </StackPanel>
+    </StackPanel>
 </UserControl>

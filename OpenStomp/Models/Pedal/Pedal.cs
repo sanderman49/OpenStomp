@@ -21,7 +21,7 @@ public class Pedal
         // Hardcode in the parameters for my development pedal. Will be done dynamically later.
         for (int i = 0; i < 4; i++) // 4 Program.
         {
-            Buttons.Add(new Button(Button.ButtonMode.Program, new Led()));
+            Buttons.Add(new Button(Button.ButtonMode.Scene, new Led()));
         }
         for (int i = 0; i < 4; i++) // 4 Control.
         {
@@ -36,6 +36,21 @@ public class Pedal
         _display = new Display();
     }
 
+    public List<Button> GetButtonsOfMode(Button.ButtonMode mode)
+    {
+        List<Button> buttons = new();
+        
+        foreach (var button in Buttons)
+        {
+            if (button.Mode == mode)
+            {
+                buttons.Add(button);
+            }
+        }
+
+        return buttons;
+    }
+    
     public void SetCurrentScene(Scene scene)
     {
         _currentScene = scene;
